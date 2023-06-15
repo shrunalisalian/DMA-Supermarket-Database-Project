@@ -1,0 +1,328 @@
+// show database
+show dbs 
+// creating a database without actually specifying,
+// the database shifts to that new database automatically 
+use mycustomers
+// To view database. However here it should 
+// ideally show that the current working directory is 
+// mycustomers but it says 'test'ERROR?
+
+db
+// creating user
+db.createUser({
+    user: "Shawn",
+    pwd: "1234",
+    roles: ["readWrite","dbAdmin"]
+
+});
+db.createCollection('customers');
+// creating the first document in the mycustomers
+
+db.mycustomers.insertOne({first_name: "John", 
+last_name:"Jannicola"});
+
+db.mycustomers.find();
+// inserting data into the table
+db.mycustomers.insertMany([{first_name: "Harry",
+last_name:"Styles"},{first_name:"Donald",
+last_name:"Trump", gender: "Male", 
+profession: "Politician"}]);
+
+db.mycustomers.find();
+
+db.mycustomers.find().pretty();
+// updating one particular data document
+db.mycustomers.updateMany({first_name:"Harry"},
+{first_name:"Harry",last_name:"Styles", gender:"Male",
+profession:"Artist"});
+// update not executing
+db.customers.updateOne({first_name:"Harry",last_name:"Styles"}, 
+{$set:{profession:"Artist"}});
+
+db.mycustomers.find().pretty();
+// updating age 
+db.mycustomers.updateOne({first_name:"John"},
+{$set:{age:45}});
+// increment age 
+db.mycustomers.updateOne({first_name:"John"},
+{$inc:{age:10}});
+
+db.mycustomers.find().pretty();
+
+//remove age -- unset
+db.mycustomers.updateOne({first_name:"John"},
+{$unset:{age:1}});
+
+db.mycustomers.find().pretty();
+
+//updating something that isn't a match
+
+db.mycustomers.updateOne({first_name:"Pooja"},
+{$set:{age:78}});
+
+db.mycustomers.find();
+
+//if pooja isn't found, then add it --UPSERT
+//NOT EXECUTING - NO ERROR 
+db.mycustomers.updateOne({first_name:"Pooja"},
+{$set:{age:78}},{UPSERT:true});
+
+//renaming 
+db.mycustomers.updateOne({first_name:"Donald"},
+{$rename:{"profession":"occupation"}});
+
+db.mycustomers.find().pretty()
+
+//removing document - this will delete all the 
+//documents that match the record
+db.mycustomers.remove({first_name:"Harry"});
+
+db.mycustomers.find()
+
+//delete only one entry
+db.mycustomers.insertMany([{first_name:"Nirav",last_name:"Modi"},
+{first_name:"Vijay",last_name:"Mallya"},
+{first_name:"Vijay", last_name:"Verma"},
+{first_name:"Nirav", last_name:"Lodha"},
+{first_name:"Susan", last_name:"William"},
+{first_name:"Miranda", last_name:"Kerr"}]);
+
+db.mycustomers.find().pretty()
+
+db.mycustomers.remove({first_name:"Vijay"},{justOne:true});
+
+db.mycustomers.find().pretty()
+//only Vijay Mallya entry was deleted
+
+//delete without justOne
+db.mycustomers.deleteMany({first_name:"Nirav"});
+
+//2 entries deleted
+
+db.mycustomers.find()
+
+db.mycustomers.insertMany([
+{first_name:"Troy",
+last_name:"Cyrus",
+gender:"Male",
+age: 33,
+    address:{
+            Street: "235 Newbury Street", 
+            City: "Boston",
+            State: "MA"
+    }, 
+    memberships: ["Standard","Premium"],
+    balance: "$550"
+    },
+
+    {first_name:"Mike",
+last_name:"Bolton",
+gender:"Male",
+age: 23,
+    address:{
+            Street: "235 Stephen Street", 
+            City: "California",
+            State: "CA"
+    }, 
+    memberships: "Premium",
+    },
+
+    {first_name:"Ashley",
+last_name:"Roy",
+gender:"Female",
+age: 21,
+    address:{
+            Street: "100 Park Street", 
+            City: "Phoenix",
+            State: "AZ"
+    }, 
+    memberships: ["Standard","Premium"],
+    balance: "$50"
+    },
+
+    {first_name:"Lily",
+last_name:"Stewart",
+gender:"Female",
+age: 18,
+    address:{
+            Street: "235 Newbury Street", 
+            City: "California",
+            State: "CA"
+    }, 
+    memberships: "Standard",
+    balance: "$0",
+    },
+    
+    {first_name:"Amber",
+last_name:"Hilton",
+gender:"Female",
+age: 28,
+    address:{
+            Street: "235 Tipton Street", 
+            City: "Boston",
+            State: "MA"
+    }, 
+    memberships: ["Standard","Premium"],
+    balance: "$5"
+    },
+
+    {first_name:"Troy",
+last_name:"Cyrus",
+gender:"Male",
+age: 33,
+    address:{
+            Street: "235 Newbury Street", 
+            City: "Boston",
+            State: "MA"
+    }, 
+    memberships: ["Standard","Premium"],
+    credit: "$550"
+    },
+])
+
+db.mycustomers.find().pretty();
+
+db.mycustomers.find({$or:[{first_name:"Amber"},
+{first_name:"Lily"}]});
+
+db.mycustomers.find({$or:[{first_name:"Amber"},
+{last_name:"Verma"}]});
+
+db.mycustomers.find({age:{$gt:20}});
+
+db.mycustomers.find({age:{$lte:33}});
+
+db.mycustomers.find({address:{
+      "Street": "235 Stephen Street",
+      "City": "California",
+      "State": "CA"
+    }});
+
+db.mycustomers.find().sort({last_name: 1});
+
+db.mycustomers.find().sort({first_name: -1});
+
+db.mycustomers.find().sort({balance: 1});
+
+db.mycustomers.find({gender: "Male"}).count();
+db.mycustomers.find({gender: "Male"}).limit(5);
+db.mycustomers.find({gender: "Male"}).limit(5).
+sort({last_name: 1});
+//iterate through customers
+
+db.mycustomers.find().forEach(function(doc)
+{print("Customer Name: "+doc.first_name)});
+
+
+db.mycustomers.find()
+
+db.mycustomers.insertMany([
+    {first_name: "Simon", 
+    last_name: "Osaka",
+    payment_info: [
+        {
+            Credit_card_no: 123456781234,
+            CVV: 909,
+            expiry_date: "2025-10-23"
+        }
+    ]},
+    
+      {first_name: "Naomi", 
+    last_name: "Osaka",
+    payment_info: [
+        {
+            Credit_card_no: 123400001234,
+            CVV: 901,
+            expiry_date: "2028-11-23"
+        }
+    ]},
+]);
+
+db.mycustomers.insertMany([
+    {first_name: "Lavina", 
+    last_name: "Pinto",
+    payment_info: [
+        {
+            Credit_card_no: 123456781234,
+            CVV: 909,
+            expiry_date: "2025-10-23",
+            company_name: "VISA",
+        }
+    ]},
+    
+      {first_name: "Jasmine", 
+    last_name: "Bryant",
+    payment_info: [
+        {
+            Credit_card_no: 123400001234,
+            CVV: 901,
+            expiry_date: "2028-11-23",
+            company_name: "MASTERCARD",
+        }
+    ]},
+]);
+
+db.mycustomers.insertMany([
+    {first_name: "Abu", 
+    last_name: "Salim",
+    payment_info: [
+        {
+            Credit_card_no: 123456781212,
+            CVV: 900,
+            expiry_date: "2025-01-23",
+            company_name: "VISA",
+        }
+    ]},
+    
+      {first_name: "Gianna", 
+    last_name: "Bryant",
+    payment_info: [
+        {
+            Credit_card_no: 123400007890,
+            CVV: 903,
+            expiry_date: "2029-01-20",
+            company_name: "MASTERCARD",
+        }
+    ]},
+]);
+
+db.mycustomers.insertMany([
+    {first_name: "Penny", 
+    last_name: "Pinto",
+    payment_info: [
+        {
+            Credit_card_no: 100456781234,
+            CVV: 209,
+            expiry_date: "2028-05-23",
+            company_name: "VISA",
+        }
+    ]},
+    
+      {first_name: "Leonard", 
+    last_name: "Hofstadter",
+    payment_info: [
+        {
+            Credit_card_no: 123999001234,
+            CVV: 897,
+            expiry_date: "2032-11-23",
+            company_name: "MASTERCARD",
+        }
+    ]},
+]);
+// The $elemMatch operator matches documents that 
+// contain an array field with at least one element 
+// that matches all the specified query criteria.
+
+
+db.mycustomers.find({
+    payment_info:{
+        $elemMatch: {
+            company_name: "VISA"
+        }
+    }
+})
+
+
+// add skip(), explain(), $exists. $regex, 
+//aggregation (maprreduce)
+//
